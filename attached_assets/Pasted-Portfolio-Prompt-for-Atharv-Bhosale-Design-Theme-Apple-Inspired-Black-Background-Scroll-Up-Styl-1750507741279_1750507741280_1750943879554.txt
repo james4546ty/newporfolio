@@ -1,0 +1,122 @@
+Portfolio Prompt for Atharv Bhosale
+Design Theme: Apple-Inspired · Black Background · Scroll-Up Style · Elegant · Responsive
+
+🎨 Visual Design
+Color Scheme: Pure black background (#000000), white/gray text
+
+Typography: SF Pro, Inter, or similar modern typeface
+
+Interaction: Scroll-triggered fade-ins, parallax transitions, and subtle hover effects
+
+Inspiration: Apple.com — clean spacing, strong hierarchy, full-width sections
+
+Navbar: Transparent on top → turns black with scroll
+
+Animations: Use Framer Motion or GSAP for section reveals
+
+🔗 Live Portfolio Reference
+https://atharvbhosale.netlify.app
+
+🧩 Website Structure
+1. Hero Section
+nginx
+Copy
+Edit
+ATHARV ANANDA BHOSALE  
+Software Developer | Problem Solver | Tech Enthusiast  
+Pune, Maharashtra | BE CSE @ SPPU
+📄 View Resume (PDF)
+
+📬 Contact Me (scrolls to bottom form)
+
+2. About Me
+BE Computer Science student committed to building smart and scalable solutions. Blending tech knowledge and teamwork, I’ve created tools from AI crop advisors to phishing detectors.
+
+🎓 BE CSE, SPPU (Expected 2027)
+
+💡 Skills: Python, C, C++, React, Node.js, SQL
+
+🛠 Tools: GitHub, VS Code, Power BI, Jupyter
+
+💬 Languages: English, Hindi, Marathi
+
+3. Projects (Scroll-Up Style Cards)
+Each project has:
+
+Image thumbnail (from atharvbhosale.netlify.app)
+
+Name + short description
+
+Technologies used
+
+GitHub & Live Demo buttons
+
+✅ Projects:
+
+KISANDHAN – AI Crop Advisor
+Smart agri app using Gemini API for crop suggestions
+🌐 Live Demo | 💻 GitHub
+
+PhishGuard – Anti-Phishing
+Detects malicious links in real-time using React
+🌐 Live Demo | 💻 GitHub
+
+Tax Mate – Income Tax Chatbot
+Recommends ITR forms using React chatbot interface
+🌐 Live Demo | 💻 GitHub
+
+MoneyMate – Expense Tracker
+Personal finance tool using Python (Tkinter)
+💻 GitHub
+
+4. Certifications (Apple Card Style with Credential Buttons)
+Fade-in horizontal or stacked card layout:
+
+🎓 Skyscanner – Software Engineering Job Simulation
+Issued: Jan 2025 · Platform: Forage
+🔗 Show Credential
+
+🎓 Goldman Sachs – Software Engineering Job Simulation
+Issued: Oct 2024 · Platform: Forage
+🔗 Show Credential
+
+🔐 Mastercard – Cybersecurity Job Simulation
+Issued: Oct 2024 · Platform: Forage
+🔗 Show Credential
+
+(Use placeholders for links if direct certificate URLs aren’t public, or host image previews with zoom)
+
+5. Hackathon Participation (Animated Timeline)
+InnoVyuh Hackathon 2025 – Developer, Team Supreme
+Organized by Google Developer Groups, MIT ACSC, Alandi
+
+INNERVE 9.0 – Finalist (Online Mode) – Team Bit Benders
+Hosted by AIT Pune
+
+6. Contact Form Section
+Black background with white outlined inputs:
+
+Form Fields:
+
+Full Name
+
+Email Address
+
+Message
+
+Submit button with loading spinner
+
+📤 Form Handling: EmailJS or Formspree
+✅ Show confirmation:
+
+"Thanks for contacting me! I’ll get back to you shortly."
+
+7. Footer
+Minimal black footer with centered white text:
+
+“Built with 💻 by Atharv Bhosale”
+GitHub | LinkedIn | Resume (PDF)
+
+🔗 GitHub
+🔗 LinkedIn
+

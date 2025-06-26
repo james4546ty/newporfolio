@@ -1,0 +1,29 @@
+COMPLETE EXAMPLE PROMPT:
+“Create a professional portfolio website with Apple-inspired design, dark theme, and smooth animations. Here are the details:
+Personal Info: - Name: ATHARV ANANDA BHOSALE - Title: Software Developer | Problem Solver | Tech Enthusiast
+- Location: Pune, Maharashtra - Education: BE CSE @ SPPU (Expected 2027)
+About: BE Computer Science student committed to building smart and scalable solutions. Blending tech knowledge and teamwork, I’ve created tools from AI crop advisors to phishing detectors.
+Skills: Python, C, C++, React, Node.js, SQL Tools: GitHub, VS Code, Power BI, Jupyter Languages: English, Hindi, Marathi
+Projects: 1. KISANDHAN – AI Crop Advisor - Description: Smart agri app using Gemini API for crop suggestions - Tech: AI, Gemini API, Agriculture - Live: https://kisandhan.netlify.app - GitHub: https://github.com/Atharv1136/KisanDhan
+2.	PhishGuard – Anti-Phishing
+–	Description: Detects malicious links in real-time using React
+–	Tech: React, Security, Real-time
+–	Live: https://phisshguard.netlify.app
+–	GitHub: https://github.com/Atharv1136/Phishgaurd
+3.	Tax Mate – Income Tax Chatbot
+–	Description: Recommends ITR forms using React chatbot interface
+–	Tech: React, Chatbot, Tax Filing
+–	Live: https://taxmatee.netlify.app
+–	GitHub: https://github.com/Atharv1136/Taxmate
+4.	MoneyMate – Expense Tracker
+–	Description: Personal finance tool using Python (Tkinter)
+–	Tech: Python, Tkinter, Finance
+–	GitHub: https://github.com/Atharv1136/MONEYMATE
+Certifications: 1. Skyscanner - Software Engineering Job Simulation (Jan 2025, Forage) 2. Goldman Sachs - Software Engineering Job Simulation (Oct 2024, Forage)
+3. Mastercard - Cybersecurity Job Simulation (Oct 2024, Forage)
+Hackathons: 1. InnoVyuh Hackathon 2025 - Developer, Team Supreme (Google Developer Groups, MIT ACSC) 2. INNERVE 9.0 - Finalist, Team Bit Benders (AIT Pune)
+Contact: Use Formspree for contact form with form ID: movwnykd
+Github link :- https://github.com/Atharv1136
+Linkdin:- https://www.linkedin.com/in/atharvbhosale/
+Resume;- https://drive.google.com/file/d/1j6MtpyIlpU5GvJTfuCu0ltvcQkZyJPwX/view?usp=drive_link
+
