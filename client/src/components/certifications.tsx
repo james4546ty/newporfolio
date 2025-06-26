@@ -1,3 +1,7 @@
+import skysCertImage from "@assets/sky_1750507766705_1750945011842.png";
+import goldmanCertImage from "@assets/gmc_1750507766704_1750945011837.png";
+import mastercardCertImage from "@assets/cyb_1750507766703_1750945011835.png";
+
 export default function Certifications() {
   const certifications = [
     {
@@ -7,10 +11,11 @@ export default function Certifications() {
       issued: 'January 2025',
       platform: 'Forage',
       icon: 'fas fa-plane',
-      gradientFrom: 'from-blue-500',
-      gradientTo: 'to-purple-600',
-      buttonColor: 'bg-blue-500 hover:bg-blue-600',
-      titleColor: 'text-blue-400',
+      cardColor: 'bg-blue-500',
+      buttonColor: 'bg-white hover:bg-gray-100 text-blue-500',
+      titleColor: 'text-white',
+      textColor: 'text-blue-100',
+      certImage: skysCertImage,
       credentialUrl: 'https://forage-uploads-prod.s3.amazonaws.com/completion-certificates/skoQmxqhtgWmKv2pm/p3xGFkpdot5H8NBih_skoQmxqhtgWmKv2pm_QLCuExjPqmfhcSzpp_1738060306337_completion_certificate.pdf'
     },
     {
@@ -20,10 +25,11 @@ export default function Certifications() {
       issued: 'October 2024',
       platform: 'Forage',
       icon: 'fas fa-chart-line',
-      gradientFrom: 'from-yellow-500',
-      gradientTo: 'to-orange-600',
-      buttonColor: 'bg-yellow-500 hover:bg-yellow-600',
-      titleColor: 'text-yellow-400',
+      cardColor: 'bg-blue-600',
+      buttonColor: 'bg-white hover:bg-gray-100 text-blue-600',
+      titleColor: 'text-white',
+      textColor: 'text-blue-100',
+      certImage: goldmanCertImage,
       credentialUrl: 'https://forage-uploads-prod.s3.amazonaws.com/completion-certificates/Goldman%20Sachs/NPdeQ43o8P9HJmJzg_Goldman%20Sachs_QLCuExjPqmfhcSzpp_1729656516724_completion_certificate.pdf'
     },
     {
@@ -33,10 +39,11 @@ export default function Certifications() {
       issued: 'October 2024',
       platform: 'Forage',
       icon: 'fas fa-shield-alt',
-      gradientFrom: 'from-red-500',
-      gradientTo: 'to-pink-600',
-      buttonColor: 'bg-red-500 hover:bg-red-600',
-      titleColor: 'text-red-400',
+      cardColor: 'bg-red-500',
+      buttonColor: 'bg-white hover:bg-gray-100 text-red-500',
+      titleColor: 'text-white',
+      textColor: 'text-red-100',
+      certImage: mastercardCertImage,
       credentialUrl: 'https://forage-uploads-prod.s3.amazonaws.com/completion-certificates/mastercard/vcKAB5yYAgvemepGQ_mfxGwGDp6WkQmtmTf_QLCuExjPqmfhcSzpp_1729915082752_completion_certificate.pdf'
     }
   ];
@@ -55,26 +62,33 @@ export default function Certifications() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {certifications.map((cert) => (
-              <div key={cert.id} className={`bg-gradient-to-br ${cert.gradientFrom} ${cert.gradientTo} p-0.5 rounded-2xl`}>
-                <div className="bg-gray-900 bg-opacity-90 p-6 rounded-2xl h-full">
-                  <div className="text-center mb-4">
-                    <div className={`w-16 h-16 ${cert.buttonColor.split(' ')[0]} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                      <i className={`${cert.icon} text-white text-2xl`}></i>
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{cert.company}</h3>
-                    <p className={`${cert.titleColor} font-semibold`}>{cert.title}</p>
+              <div key={cert.id} className={`${cert.cardColor} rounded-2xl p-6 shadow-2xl transform transition-all duration-300 hover:scale-105`}>
+                {/* Certificate Image */}
+                <div className="bg-white rounded-xl p-4 mb-6 shadow-lg">
+                  <img 
+                    src={cert.certImage} 
+                    alt={`${cert.company} Certificate`}
+                    className="w-full h-auto rounded-lg"
+                  />
+                </div>
+                
+                {/* Certificate Details */}
+                <div className="text-center">
+                  <h3 className={`text-xl font-bold ${cert.titleColor} mb-2`}>{cert.company}</h3>
+                  <p className={`${cert.titleColor} font-semibold mb-3`}>{cert.title}</p>
+                  <div className={`space-y-1 ${cert.textColor} mb-6 text-sm`}>
+                    <p><strong>Issued:</strong> {cert.issued} • <strong>Platform:</strong> {cert.platform}</p>
                   </div>
-                  <div className="space-y-2 text-gray-300 mb-6">
-                    <p><strong>Issued:</strong> {cert.issued}</p>
-                    <p><strong>Platform:</strong> {cert.platform}</p>
-                  </div>
+                  
+                  {/* Show Credential Button */}
                   <a 
                     href={cert.credentialUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className={`block w-full ${cert.buttonColor} text-white py-2 px-4 rounded-lg font-medium transition-colors duration-300 text-center`}
+                    className={`inline-flex items-center gap-2 ${cert.buttonColor} py-2 px-6 rounded-lg font-medium transition-colors duration-300`}
                   >
-                    <i className="fas fa-certificate mr-2"></i>Show Credential
+                    <i className="fas fa-external-link-alt"></i>
+                    Show Credential
                   </a>
                 </div>
               </div>
