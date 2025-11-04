@@ -150,8 +150,28 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  // Wrapper to ensure we always send a response
+  const sendErrorResponse = (status: number, message: string, error?: any) => {
+    if (!res.headersSent) {
+      try {
+        res.status(status).json({ 
+          message,
+          ...(process.env.NODE_ENV === 'development' && error ? { error: error.message, stack: error.stack } : {})
+        });
+      } catch (e) {
+        console.error('Failed to send error response:', e);
+      }
+    }
+  };
+
   try {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url || req.path}`);
+    console.log('Environment check:', {
+      STORAGE_TYPE: process.env.STORAGE_TYPE || 'not set',
+      MONGODB_URI: process.env.MONGODB_URI ? 'set' : 'not set',
+      SESSION_SECRET: process.env.SESSION_SECRET ? 'set' : 'not set',
+      VERCEL: process.env.VERCEL || 'not set'
+    });
     
     // Ensure MongoDB connection is ready before handling request
     if (process.env.STORAGE_TYPE === 'mongodb' && process.env.MONGODB_URI) {
@@ -166,48 +186,63 @@ export default async function handler(
       }
     }
 
-    const expressApp = await getApp();
+    let expressApp: Express;
+    try {
+      expressApp = await getApp();
+    } catch (appError: any) {
+      console.error('❌ Failed to get Express app:', appError.message);
+      console.error('Stack:', appError.stack);
+      return sendErrorResponse(500, 'Failed to initialize application', appError);
+    }
     
     // Convert Vercel request/response to Express format
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
+      let resolved = false;
+      
       // Set timeout for the request (Vercel has 10s timeout for Hobby, 60s for Pro)
       const timeout = setTimeout(() => {
-        if (!res.headersSent) {
-          res.status(504).json({ 
-            message: 'Request timeout',
-            error: 'The request took too long to process'
-          });
+        if (!resolved && !res.headersSent) {
+          resolved = true;
+          sendErrorResponse(504, 'Request timeout');
+          resolve();
         }
-        reject(new Error('Request timeout'));
       }, 9000); // 9 seconds to leave buffer for Vercel's 10s limit
 
       // Handle the request through Express
-      expressApp(req as any, res as any, (err: any) => {
-        clearTimeout(timeout);
-        if (err) {
-          console.error('❌ Express error:', err.message || err);
-          console.error('Stack:', err.stack);
-          if (!res.headersSent) {
-            res.status(err.status || err.statusCode || 500).json({ 
-              message: err.message || 'Internal Server Error',
-              error: process.env.NODE_ENV === 'development' ? err.message : undefined
-            });
+      try {
+        expressApp(req as any, res as any, (err: any) => {
+          clearTimeout(timeout);
+          if (resolved) return;
+          
+          if (err) {
+            console.error('❌ Express error:', err.message || err);
+            console.error('Stack:', err.stack);
+            if (!res.headersSent) {
+              sendErrorResponse(
+                err.status || err.statusCode || 500,
+                err.message || 'Internal Server Error',
+                err
+              );
+            }
           }
-          resolve(); // Don't reject, just resolve to prevent unhandled rejection
-        } else {
+          resolved = true;
           resolve();
+        });
+      } catch (expressError: any) {
+        clearTimeout(timeout);
+        if (!resolved && !res.headersSent) {
+          resolved = true;
+          console.error('❌ Express handler error:', expressError.message);
+          console.error('Stack:', expressError.stack);
+          sendErrorResponse(500, 'Request processing failed', expressError);
         }
-      });
+        resolve();
+      }
     });
   } catch (error: any) {
     console.error('❌ Serverless function error:', error.message || error);
     console.error('Stack:', error.stack);
-    if (!res.headersSent) {
-      res.status(500).json({ 
-        message: 'Internal Server Error',
-        error: error.message || 'An unexpected error occurred'
-      });
-    }
+    sendErrorResponse(500, 'Internal Server Error', error);
   }
 }
 
