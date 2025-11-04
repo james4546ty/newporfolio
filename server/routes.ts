@@ -12,21 +12,40 @@ dotenv.config();
 
 // Choose storage based on environment variable
 const STORAGE_TYPE = process.env.STORAGE_TYPE || 'simple';
-console.log(`\n📦 routes.ts: Loading storage module`);
-console.log(`   STORAGE_TYPE from env: ${process.env.STORAGE_TYPE || 'undefined'}`);
-console.log(`   Using STORAGE_TYPE: ${STORAGE_TYPE}`);
 
-const storageModule = STORAGE_TYPE === 'mongodb' 
-  ? await import("./storage.mongodb")
-  : await import("./storage.simple");
-const storage = storageModule.storage;
+// Lazy load storage to avoid top-level await issues in serverless
+let storageCache: any = null;
 
-console.log(`✅ routes.ts: Storage module loaded (type: ${STORAGE_TYPE})`);
-console.log(`   Storage methods available:`, {
-  getUserByUsername: typeof storage.getUserByUsername === 'function',
-  createUser: typeof storage.createUser === 'function',
-  getAllProjects: typeof storage.getAllProjects === 'function'
-});
+async function getStorage() {
+  if (storageCache) {
+    return storageCache;
+  }
+
+  try {
+    console.log(`\n📦 routes.ts: Loading storage module`);
+    console.log(`   STORAGE_TYPE from env: ${process.env.STORAGE_TYPE || 'undefined'}`);
+    console.log(`   Using STORAGE_TYPE: ${STORAGE_TYPE}`);
+
+    const storageModule = STORAGE_TYPE === 'mongodb' 
+      ? await import("./storage.mongodb")
+      : await import("./storage.simple");
+    storageCache = storageModule.storage;
+
+    console.log(`✅ routes.ts: Storage module loaded (type: ${STORAGE_TYPE})`);
+    console.log(`   Storage methods available:`, {
+      getUserByUsername: typeof storageCache.getUserByUsername === 'function',
+      createUser: typeof storageCache.createUser === 'function',
+      getAllProjects: typeof storageCache.getAllProjects === 'function'
+    });
+
+    return storageCache;
+  } catch (error: any) {
+    console.error('❌ Error loading storage module:', error);
+    throw error;
+  }
+}
+
+// Remove the Proxy - we'll use getStorage() directly everywhere
 
 // Helper function to normalize data from both storage types
 function normalizeItem(item: any) {
@@ -78,6 +97,9 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize storage first (cache it for subsequent requests)
+  await getStorage();
+
   // Health check
   app.get("/api/health", (req: Request, res: Response) => {
     res.json({ status: "ok" });
@@ -93,7 +115,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Username and password are required" });
       }
 
-      const user = await storage.getUserByUsername(username);
+      // Get storage instance (it's already cached, so this is fast)
+      const storageInstance = await getStorage();
+      const user = await storageInstance.getUserByUsername(username);
       console.log('👤 User lookup result:', user ? 'Found user' : 'User not found');
       
       if (!user) {
@@ -144,7 +168,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public data routes (no auth required)
   app.get("/api/about", async (req: Request, res: Response) => {
     try {
-      const about = await storage.getAboutData();
+      const storageInstance = await getStorage();
+      const about = await storageInstance.getAboutData();
       if (!about) {
         return res.json(null);
       }
@@ -160,7 +185,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/certifications", async (req: Request, res: Response) => {
     try {
-      const certs = await storage.getAllCertifications();
+      const storageInstance = await getStorage();
+      const certs = await storageInstance.getAllCertifications();
       res.json(certs.map(cert => {
         if ('toObject' in cert) {
           return { ...cert.toObject(), id: cert._id.toString() };
@@ -174,7 +200,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/hackathons", async (req: Request, res: Response) => {
     try {
-      const hackathons = await storage.getAllHackathons();
+      const storageInstance = await getStorage();
+      const hackathons = await storageInstance.getAllHackathons();
       res.json(hackathons.map(hack => {
         if ('toObject' in hack) {
           return { ...hack.toObject(), id: hack._id.toString() };
@@ -188,7 +215,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects", async (req: Request, res: Response) => {
     try {
-      const projects = await storage.getAllProjects();
+      const storageInstance = await getStorage();
+      const projects = await storageInstance.getAllProjects();
       res.json(projects.map(project => {
         if ('toObject' in project) {
           return { ...project.toObject(), id: project._id.toString() };
@@ -205,6 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // About management
   app.put("/api/admin/about", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const storageInstance = await getStorage();
       const aboutData = {
         bio: req.body.bio,
         education: req.body.education,
@@ -212,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         skills: Array.isArray(req.body.skills) ? req.body.skills : [],
         tools: Array.isArray(req.body.tools) ? req.body.tools : [],
       };
-      const about = await storage.upsertAboutData(aboutData);
+      const about = await storageInstance.upsertAboutData(aboutData);
       res.json(normalizeItem(about));
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -247,7 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           displayOrder: parseInt(req.body.displayOrder) || 0,
         };
 
-        const cert = await storage.createCertification(certData);
+        const storageInstance = await getStorage();
+        const cert = await storageInstance.createCertification(certData);
         res.json(normalizeItem(cert));
       } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -282,7 +312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Certificate image URL is required" });
         }
 
-        const cert = await storage.updateCertification(id, updateData);
+        const storageInstance = await getStorage();
+        const cert = await storageInstance.updateCertification(id, updateData);
         if (!cert) {
           return res.status(404).json({ message: "Certification not found" });
         }
@@ -295,8 +326,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/certifications/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const storageInstance = await getStorage();
       const id = req.params.id;
-      const success = await storage.deleteCertification(id);
+      const success = await storageInstance.deleteCertification(id);
       if (!success) {
         return res.status(404).json({ message: "Certification not found" });
       }
@@ -319,7 +351,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayOrder: parseInt(req.body.displayOrder) || 0,
       };
 
-      const hackathon = await storage.createHackathon(hackathonData);
+      const storageInstance = await getStorage();
+      const hackathon = await storageInstance.createHackathon(hackathonData);
       res.json(normalizeItem(hackathon));
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -339,7 +372,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayOrder: parseInt(req.body.displayOrder) || 0,
       };
 
-      const hackathon = await storage.updateHackathon(id, updateData);
+      const storageInstance = await getStorage();
+      const hackathon = await storageInstance.updateHackathon(id, updateData);
       if (!hackathon) {
         return res.status(404).json({ message: "Hackathon not found" });
       }
@@ -352,7 +386,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/hackathons/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = req.params.id;
-      const success = await storage.deleteHackathon(id);
+      const storageInstance = await getStorage();
+      const success = await storageInstance.deleteHackathon(id);
       if (!success) {
         return res.status(404).json({ message: "Hackathon not found" });
       }
@@ -387,7 +422,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log('Creating project with data:', projectData);
-      const project = await storage.createProject(projectData);
+      const storageInstance = await getStorage();
+      const project = await storageInstance.createProject(projectData);
       console.log('Project created successfully:', project);
       res.json(normalizeItem(project));
     } catch (error: any) {
@@ -411,7 +447,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayOrder: parseInt(req.body.displayOrder) || 0,
       };
 
-      const project = await storage.updateProject(id, updateData);
+      const storageInstance = await getStorage();
+      const project = await storageInstance.updateProject(id, updateData);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
@@ -424,7 +461,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/projects/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = req.params.id;
-      const success = await storage.deleteProject(id);
+      const storageInstance = await getStorage();
+      const success = await storageInstance.deleteProject(id);
       if (!success) {
         return res.status(404).json({ message: "Project not found" });
       }
@@ -442,13 +480,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Username and password are required" });
       }
 
-      const existingUser = await storage.getUserByUsername(username);
+      const storageInstance = await getStorage();
+      const existingUser = await storageInstance.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await storage.createUser({
+      const user = await storageInstance.createUser({
         username,
         password: hashedPassword,
       });
