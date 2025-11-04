@@ -13,7 +13,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const storage = await getStorage();
-  const id = req.query.id as string | undefined;
+  const slug = req.query.slug as string[] | undefined;
+  const id = slug && slug.length > 0 ? slug[0] : undefined;
 
   if (req.method === 'POST' && !id) {
     try {

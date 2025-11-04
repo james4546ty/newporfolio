@@ -16,18 +16,6 @@
   ],
   "rewrites": [
     {
-      "source": "/api/admin/certifications/:id",
-      "destination": "/api/admin/certifications?id=:id"
-    },
-    {
-      "source": "/api/admin/projects/:id",
-      "destination": "/api/admin/projects?id=:id"
-    },
-    {
-      "source": "/api/admin/hackathons/:id",
-      "destination": "/api/admin/hackathons?id=:id"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
