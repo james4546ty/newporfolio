@@ -128,27 +128,61 @@ export default async function handler(
   res: VercelResponse
 ) {
   try {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    
+    // Ensure MongoDB connection is ready before handling request
+    if (process.env.STORAGE_TYPE === 'mongodb' && process.env.MONGODB_URI) {
+      try {
+        const { connectToDatabase } = await import('../server/mongodb');
+        await connectToDatabase();
+        console.log('✅ MongoDB connection ready');
+      } catch (dbError: any) {
+        console.error('❌ MongoDB connection error in handler:', dbError.message);
+        console.error('Stack:', dbError.stack);
+        // Continue anyway - getApp() will handle reconnection
+      }
+    }
+
     const expressApp = await getApp();
     
     // Convert Vercel request/response to Express format
-    // Vercel's @vercel/node automatically handles this, but we wrap it for safety
     return new Promise<void>((resolve, reject) => {
+      // Set timeout for the request (Vercel has 10s timeout for Hobby, 60s for Pro)
+      const timeout = setTimeout(() => {
+        if (!res.headersSent) {
+          res.status(504).json({ 
+            message: 'Request timeout',
+            error: 'The request took too long to process'
+          });
+        }
+        reject(new Error('Request timeout'));
+      }, 9000); // 9 seconds to leave buffer for Vercel's 10s limit
+
       // Handle the request through Express
       expressApp(req as any, res as any, (err: any) => {
+        clearTimeout(timeout);
         if (err) {
-          console.error('Express error:', err);
-          reject(err);
+          console.error('❌ Express error:', err.message || err);
+          console.error('Stack:', err.stack);
+          if (!res.headersSent) {
+            res.status(err.status || err.statusCode || 500).json({ 
+              message: err.message || 'Internal Server Error',
+              error: process.env.NODE_ENV === 'development' ? err.message : undefined
+            });
+          }
+          resolve(); // Don't reject, just resolve to prevent unhandled rejection
         } else {
           resolve();
         }
       });
     });
   } catch (error: any) {
-    console.error('Serverless function error:', error);
+    console.error('❌ Serverless function error:', error.message || error);
+    console.error('Stack:', error.stack);
     if (!res.headersSent) {
       res.status(500).json({ 
         message: 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: error.message || 'An unexpected error occurred'
       });
     }
   }
