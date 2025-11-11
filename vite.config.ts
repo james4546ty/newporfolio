@@ -29,6 +29,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    allowedHosts: ["p6v855-5000.csb.app"],
     fs: {
       strict: true,
       deny: ["**/.*"],
