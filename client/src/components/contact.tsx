@@ -70,7 +70,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-20 lg:py-32">
+    <section id="contact" className="py-20 lg:py-32 scroll-mt-20">
       <div className="max-w-4xl mx-auto px-6 sm:px-8">
         <div className="section-reveal">
           <div className="text-center mb-16">

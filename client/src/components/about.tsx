@@ -21,7 +21,7 @@ export default function About() {
   const tools = Array.isArray(about.tools) ? about.tools : defaultAbout.tools;
 
   return (
-    <section id="about" className="py-20 lg:py-32 relative">
+    <section id="about" className="py-20 lg:py-32 relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="section-reveal">
           <div className="text-center mb-16">
